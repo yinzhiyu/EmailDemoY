@@ -3,6 +3,11 @@ package com.email.service;
 
 import android.content.Context;
 
+import com.android.application.greendao.MailDao;
+import com.email.app.BaseApplication;
+import com.email.table.Mail;
+import com.email.utils.SharePreferenceUtil;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,10 +17,6 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Store;
 import javax.mail.internet.MimeMessage;
-
-import com.android.application.greendao.MailDao;
-import com.email.app.BaseApplication;
-import com.email.table.Mail;
 
 public class MailHelper {
 
@@ -32,11 +33,8 @@ public class MailHelper {
     }
 
     /**
-     * 构造函数
-     * 
-     * @param popHost
-     * @param userAcount
-     * @param password
+     *
+     * @param context
      */
     private MailHelper(Context context) {
         this.context = context;
@@ -161,28 +159,30 @@ public class MailHelper {
      * @throws MessagingException
      */
     public static void getAllMailForData(String folderName) throws MessagingException {
-        List<MailReceiver> mailList = new ArrayList<MailReceiver>();
-
-        // 连接服务器
-        Store store= BaseApplication.session.getStore("pop3");
-        String temp= BaseApplication.info.getMailServerHost();
-        String host=temp.replace("smtp", "pop");
-        store.connect(host, BaseApplication.info.getUserName(), BaseApplication.info.getPassword());
-        // 打开文件夹
-        Folder folder = store.getFolder(folderName);
-        folder.open(Folder.READ_ONLY);
-        // 总的邮件数
-        int mailCount = folder.getMessageCount();
-        if (mailCount == 0) {
-            folder.close(true);
-            store.close();
-        } else {
-            // 取得所有的邮件
-            Message[] messages = folder.getMessages();
-             for (int i = 0; i < messages.length; i++) {
-                // 自定义的邮件对象
-                MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
-                 insertSMS(reciveMail);// 添加到邮件数据库中
+        int dataNum = SharePreferenceUtil.getInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM);
+        if (dataNum ==-1) {
+            // 连接服务器
+            Store store = BaseApplication.session.getStore("pop3");
+            String temp = BaseApplication.info.getMailServerHost();
+            String host = temp.replace("smtp", "pop");
+            store.connect(host, BaseApplication.info.getUserName(), BaseApplication.info.getPassword());
+            // 打开文件夹
+            Folder folder = store.getFolder(folderName);
+            folder.open(Folder.READ_ONLY);
+            // 总的邮件数
+            int mailCount = folder.getMessageCount();
+            if (mailCount == 0) {
+                folder.close(true);
+                store.close();
+            } else {
+                SharePreferenceUtil.saveInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM, mailCount);
+                // 取得所有的邮件
+                Message[] messages = folder.getMessages();
+                for (int i = 0; i < messages.length; i++) {
+                    // 自定义的邮件对象
+                    MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
+                    insertSMS(reciveMail);// 添加到邮件数据库中
+                }
             }
         }
     }

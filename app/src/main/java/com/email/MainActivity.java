@@ -1,5 +1,7 @@
 package com.email;
 
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -13,10 +15,13 @@ import android.widget.Toast;
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
+import com.email.service.MailHelper;
 import com.email.ui.fragment.InboxFragment;
 import com.email.ui.fragment.MeFragment;
 import com.email.ui.fragment.PhoneFragment;
 import com.email.ui.fragment.RubbishBoxFragment;
+
+import javax.mail.MessagingException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,7 +44,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     private MeFragment mMeFragment;
     private int lastSelectedPosition;
     private int tabIndex;
-
+    private ProgressDialog dialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +52,14 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
         ButterKnife.bind(this);
         initView();
         setDefaultFragment();
+        setIndoxData();
+    }
+
+    private void setIndoxData() {
+        new MyTask().execute();
+        dialog=new ProgressDialog(this);
+        dialog.setMessage("加載中...");
+        dialog.show();
     }
 
     private void initView() {
@@ -224,6 +237,23 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
         } else {
             finish();
             System.exit(0);
+        }
+    }
+    class MyTask extends AsyncTask<Integer, Integer, String> {
+        @Override
+        protected String doInBackground(Integer... integers) {
+            try {
+                MailHelper.getAllMailForData("INBOX");
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+            return "3Q";
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            dialog.dismiss();
         }
     }
 }
