@@ -17,7 +17,7 @@ import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.email.service.MailHelper;
 import com.email.ui.fragment.InboxFragment;
-import com.email.ui.fragment.MeFragment;
+import com.email.ui.fragment.KeyWordFragment;
 import com.email.ui.fragment.PhoneFragment;
 import com.email.ui.fragment.RubbishBoxFragment;
 
@@ -41,7 +41,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     private InboxFragment mInboxFragment;
     private RubbishBoxFragment mRubbishBoxFragment;
     private PhoneFragment mPhoneFragment;
-    private MeFragment mMeFragment;
+    private KeyWordFragment mMeFragment;
     private int lastSelectedPosition;
     private int tabIndex;
     private ProgressDialog dialog;
@@ -157,7 +157,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
                 break;
             case 3:
                 if (mMeFragment == null) {
-                    mMeFragment = MeFragment.newInstance("mMeFragment");
+                    mMeFragment = KeyWordFragment.newInstance("mMeFragment");
                     transaction.add(R.id.tb, mMeFragment);
                 } else {
                     transaction.show(mMeFragment);
@@ -214,8 +214,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
             mRubbishBoxFragment = (RubbishBoxFragment) fragment;
         } else if (mPhoneFragment == null && fragment instanceof PhoneFragment) {
             mPhoneFragment = (PhoneFragment) fragment;
-        } else if (mMeFragment == null && fragment instanceof MeFragment) {
-            mMeFragment = (MeFragment) fragment;
+        } else if (mMeFragment == null && fragment instanceof KeyWordFragment) {
+            mMeFragment = (KeyWordFragment) fragment;
         }
     }
 
