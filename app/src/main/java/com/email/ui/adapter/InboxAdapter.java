@@ -1,13 +1,16 @@
 package com.email.ui.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.email.MailContentActivity;
 import com.email.R;
 import com.email.table.Mail;
 
@@ -54,7 +57,7 @@ public class InboxAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         holder.itemView.setTag(position);
         // 给ViewHolder设置元素
         final Mail mail = list.get(position);
@@ -63,6 +66,14 @@ public class InboxAdapter extends RecyclerView.Adapter {
             viewHolder.tvPhone.setText("发件人：" + mail.getFrom());
             viewHolder.tvContent.setText(mail.getSubject());
             viewHolder.tvTime.setText("时间：" + mail.getSentdata());
+            viewHolder.mRlClick.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(mContext, MailContentActivity.class).putExtra("messageID", mail.getMessageID());
+                    mContext.startActivity(intent);
+                }
+            });
+
         }
     }
 
@@ -72,7 +83,10 @@ public class InboxAdapter extends RecyclerView.Adapter {
         return list.size();
     }
 
+
     static class ViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.rl_click)
+        RelativeLayout mRlClick;
         @BindView(R.id.tv_phone)
         TextView tvPhone;
         @BindView(R.id.tv_content)

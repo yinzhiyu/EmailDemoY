@@ -11,26 +11,26 @@
        <Button 
             android:id="@+id/btn_cancel"
             android:layout_height="wrap_content"
-            android:layout_width="100dip"
+           android:layout_width="100dp"
             android:background="@drawable/mm_title_btn_back"
             android:text="@string/back"
             android:textColor="#ffffff"/>
         <TextView 
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_gravity="center_vertical"
             android:text="@string/mail_content"
+            android:layout_weight="1"
             android:textColor="#ffffff"
             android:textSize="20sp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="20dip"/>
+            android:gravity="center" />
         <Button 
             android:id="@+id/btn_relay"
             android:layout_height="wrap_content"
-            android:layout_width="100dip"
+            android:layout_width="100dp"
             android:background="@drawable/mm_title_btn_right"
             android:text="@string/btn_replay"
-            android:textColor="#ffffff"
-            android:layout_marginLeft="40dip"/>
+            android:textColor="#ffffff" />
    </LinearLayout>
 
     <TextView

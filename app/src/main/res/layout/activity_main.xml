@@ -5,11 +5,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
     <LinearLayout
-        android:layout_height="50dip"
+        android:layout_height="48dp"
         android:layout_width="match_parent"
+        android:gravity="center"
         android:background="#297DC6">
         <TextView
-            android:layout_marginLeft="100dip"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:text="@string/tv_title"

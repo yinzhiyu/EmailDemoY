@@ -1,18 +1,13 @@
-package com.email.table;
+package com.email.bean;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
+/**
+ * Created by yinzhiyu on 2018-4-3.
+ */
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
-@Entity
-public class Mail implements Parcelable{
-    @Id(autoincrement = true)
+public class MailBean implements Parcelable{
     private Long id;
     private String messageID;
     private String from;
@@ -25,31 +20,10 @@ public class Mail implements Parcelable{
     private boolean replysign;
     private boolean html;
     private boolean news;
-//    private ArrayList<String> attachments;
+    //    private ArrayList<String> attachments;
     private String charset;
-    @Generated(hash = 1420259787)
-    public Mail(Long id, String messageID, String from, String to, String cc,
-            String bcc, String subject, String sentdata, String content,
-            boolean replysign, boolean html, boolean news, String charset) {
-        this.id = id;
-        this.messageID = messageID;
-        this.from = from;
-        this.to = to;
-        this.cc = cc;
-        this.bcc = bcc;
-        this.subject = subject;
-        this.sentdata = sentdata;
-        this.content = content;
-        this.replysign = replysign;
-        this.html = html;
-        this.news = news;
-        this.charset = charset;
-    }
-    @Generated(hash = 1943431032)
-    public Mail() {
-    }
 
-    protected Mail(Parcel in) {
+    protected MailBean(Parcel in) {
         if (in.readByte() == 0) {
             id = null;
         } else {
@@ -69,93 +43,118 @@ public class Mail implements Parcelable{
         charset = in.readString();
     }
 
-    public static final Creator<Mail> CREATOR = new Creator<Mail>() {
+    public static final Creator<MailBean> CREATOR = new Creator<MailBean>() {
         @Override
-        public Mail createFromParcel(Parcel in) {
-            return new Mail(in);
+        public MailBean createFromParcel(Parcel in) {
+            return new MailBean(in);
         }
 
         @Override
-        public Mail[] newArray(int size) {
-            return new Mail[size];
+        public MailBean[] newArray(int size) {
+            return new MailBean[size];
         }
     };
 
     public Long getId() {
-        return this.id;
+        return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
+
     public String getMessageID() {
-        return this.messageID;
+        return messageID;
     }
+
     public void setMessageID(String messageID) {
         this.messageID = messageID;
     }
+
     public String getFrom() {
-        return this.from;
+        return from;
     }
+
     public void setFrom(String from) {
         this.from = from;
     }
+
     public String getTo() {
-        return this.to;
+        return to;
     }
+
     public void setTo(String to) {
         this.to = to;
     }
+
     public String getCc() {
-        return this.cc;
+        return cc;
     }
+
     public void setCc(String cc) {
         this.cc = cc;
     }
+
     public String getBcc() {
-        return this.bcc;
+        return bcc;
     }
+
     public void setBcc(String bcc) {
         this.bcc = bcc;
     }
+
     public String getSubject() {
-        return this.subject;
+        return subject;
     }
+
     public void setSubject(String subject) {
         this.subject = subject;
     }
+
     public String getSentdata() {
-        return this.sentdata;
+        return sentdata;
     }
+
     public void setSentdata(String sentdata) {
         this.sentdata = sentdata;
     }
+
     public String getContent() {
-        return this.content;
+        return content;
     }
+
     public void setContent(String content) {
         this.content = content;
     }
-    public boolean getReplysign() {
-        return this.replysign;
+
+    public boolean isReplysign() {
+        return replysign;
     }
+
     public void setReplysign(boolean replysign) {
         this.replysign = replysign;
     }
-    public boolean getHtml() {
-        return this.html;
+
+    public boolean isHtml() {
+        return html;
     }
+
     public void setHtml(boolean html) {
         this.html = html;
     }
-    public boolean getNews() {
-        return this.news;
+
+    public boolean isNews() {
+        return news;
     }
+
     public void setNews(boolean news) {
         this.news = news;
     }
+
     public String getCharset() {
-        return this.charset;
+        return charset;
     }
+
     public void setCharset(String charset) {
         this.charset = charset;
     }
