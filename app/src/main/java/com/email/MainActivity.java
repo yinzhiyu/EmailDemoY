@@ -91,8 +91,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
         bottomNavigationBar
                 .addItem(new BottomNavigationItem(R.drawable.indox, "收件箱"))
                 .addItem(new BottomNavigationItem(R.drawable.trash_can, "垃圾箱"))
-                .addItem(new BottomNavigationItem(R.drawable.key_woed, "关键字"))
                 .addItem(new BottomNavigationItem(R.drawable.blacklist, "黑名单"))
+                .addItem(new BottomNavigationItem(R.drawable.key_woed, "关键字"))
                 .setFirstSelectedPosition(lastSelectedPosition)
                 .initialise();
         // TODO 设置 BadgeItem 默认隐藏 注意 这句代码在添加 BottomNavigationItem 之后
@@ -254,6 +254,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             dialog.dismiss();
+            mInboxFragment.onResume();
         }
     }
 }

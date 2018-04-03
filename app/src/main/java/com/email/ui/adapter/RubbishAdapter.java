@@ -107,8 +107,6 @@ public class RubbishAdapter extends RecyclerView.Adapter {
         TextView tvContent;
         @BindView(R.id.tv_time)
         TextView tvTime;
-        @BindView(R.id.trash_can)
-        ImageView trashCan;
 
         ViewHolder(View view) {
             super(view);
