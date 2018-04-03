@@ -124,8 +124,8 @@ public class MailContentActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(MailContentActivity.this, "修改中...", Toast.LENGTH_SHORT).show();
-//                startActivity(new Intent(MailContentActivity.this, MailEditActivity.class).putExtra("EMAIL", email).putExtra("TYPE", 1));
+//                Toast.makeText(MailContentActivity.this, "修改中...", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(MailContentActivity.this, MailEditActivity.class).putExtra("EMAIL", smsList.get(0).getFrom()).putExtra("TYPE", 1));
             }
         });       
         /*btn_relay.setOnLongClickListener(new OnLongClickListener() {
