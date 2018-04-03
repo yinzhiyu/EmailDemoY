@@ -1,4 +1,4 @@
-package com.email;
+package com.email.app;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +9,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 
+import com.email.LoginActivity;
 import com.email.utils.ActivityCollector;
 import com.email.utils.CommonUtil;
 

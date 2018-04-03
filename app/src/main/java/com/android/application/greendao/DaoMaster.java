@@ -21,18 +21,18 @@ public class DaoMaster extends AbstractDaoMaster {
 
     /** Creates underlying database table using DAOs. */
     public static void createAllTables(Database db, boolean ifNotExists) {
-        MailDao.createTable(db, ifNotExists);
-        UserDao.createTable(db, ifNotExists);
-        MailBListDao.createTable(db, ifNotExists);
         KeyWordDao.createTable(db, ifNotExists);
+        MailDao.createTable(db, ifNotExists);
+        MailBListDao.createTable(db, ifNotExists);
+        UserDao.createTable(db, ifNotExists);
     }
 
     /** Drops underlying database table using DAOs. */
     public static void dropAllTables(Database db, boolean ifExists) {
-        MailDao.dropTable(db, ifExists);
-        UserDao.dropTable(db, ifExists);
-        MailBListDao.dropTable(db, ifExists);
         KeyWordDao.dropTable(db, ifExists);
+        MailDao.dropTable(db, ifExists);
+        MailBListDao.dropTable(db, ifExists);
+        UserDao.dropTable(db, ifExists);
     }
 
     /**
@@ -51,10 +51,10 @@ public class DaoMaster extends AbstractDaoMaster {
 
     public DaoMaster(Database db) {
         super(db, SCHEMA_VERSION);
-        registerDaoClass(MailDao.class);
-        registerDaoClass(UserDao.class);
-        registerDaoClass(MailBListDao.class);
         registerDaoClass(KeyWordDao.class);
+        registerDaoClass(MailDao.class);
+        registerDaoClass(MailBListDao.class);
+        registerDaoClass(UserDao.class);
     }
 
     public DaoSession newSession() {

@@ -15,11 +15,13 @@ import android.widget.Toast;
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
+import com.email.app.BaseActivity;
 import com.email.service.MailHelper;
 import com.email.ui.fragment.InboxFragment;
 import com.email.ui.fragment.KeyWordFragment;
 import com.email.ui.fragment.PhoneFragment;
 import com.email.ui.fragment.RubbishBoxFragment;
+import com.email.ui.fragment.SettingFragment;
 
 import javax.mail.MessagingException;
 
@@ -42,6 +44,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     private RubbishBoxFragment mRubbishBoxFragment;
     private PhoneFragment mPhoneFragment;
     private KeyWordFragment mMeFragment;
+    private SettingFragment mSettingFragment;
     private int lastSelectedPosition;
     private int tabIndex;
     private ProgressDialog dialog;
@@ -93,6 +96,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
                 .addItem(new BottomNavigationItem(R.drawable.trash_can, "垃圾箱"))
                 .addItem(new BottomNavigationItem(R.drawable.blacklist, "黑名单"))
                 .addItem(new BottomNavigationItem(R.drawable.key_woed, "关键字"))
+                .addItem(new BottomNavigationItem(R.drawable.user_setting, "设置"))
                 .setFirstSelectedPosition(lastSelectedPosition)
                 .initialise();
         // TODO 设置 BadgeItem 默认隐藏 注意 这句代码在添加 BottomNavigationItem 之后
@@ -163,6 +167,14 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
                     transaction.show(mMeFragment);
                 }
                 break;
+            case 4:
+                if (mSettingFragment == null) {
+                    mSettingFragment = SettingFragment.newInstance("mSettingFragment");
+                    transaction.add(R.id.tb, mSettingFragment);
+                } else {
+                    transaction.show(mSettingFragment);
+                }
+                break;
             default:
                 break;
         }
@@ -199,6 +211,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
         if (mMeFragment != null) {
             transaction.hide(mMeFragment);
         }
+        if (mSettingFragment != null) {
+            transaction.hide(mSettingFragment);
+        }
     }
 
 
@@ -214,8 +229,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
             mRubbishBoxFragment = (RubbishBoxFragment) fragment;
         } else if (mPhoneFragment == null && fragment instanceof PhoneFragment) {
             mPhoneFragment = (PhoneFragment) fragment;
-        } else if (mMeFragment == null && fragment instanceof KeyWordFragment) {
+        }        else if (mMeFragment == null && fragment instanceof KeyWordFragment) {
             mMeFragment = (KeyWordFragment) fragment;
+        }        else if (mSettingFragment == null && fragment instanceof SettingFragment) {
+            mSettingFragment = (SettingFragment) fragment;
         }
     }
 

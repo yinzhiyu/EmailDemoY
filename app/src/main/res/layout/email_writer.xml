@@ -17,20 +17,20 @@
             android:textColor="#ffffff"/>
         <TextView 
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:text="@string/writer"
+            android:layout_weight="1"
+            android:gravity="center"
             android:textColor="#ffffff"
             android:textSize="25sp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="20dip"/>
+            android:layout_gravity="center_vertical"            />
         <Button 
             android:id="@+id/send"
             android:layout_height="wrap_content"
             android:layout_width="100dip"
             android:background="@drawable/mm_title_btn_right"
             android:text="@string/send"
-            android:textColor="#ffffff"
-            android:layout_marginLeft="20dip"/>
+            android:textColor="#ffffff"           />
     </LinearLayout>
     <LinearLayout
         android:layout_marginTop="20dip"
