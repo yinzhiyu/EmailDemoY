@@ -178,11 +178,16 @@ public class MailHelper {
                 SharePreferenceUtil.saveInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM, mailCount);
                 // 取得所有的邮件
                 Message[] messages = folder.getMessages();
-                for (int i = 0; i < messages.length; i++) {
+                for (int i = messages.length-1; i >=0; i--) {
                     // 自定义的邮件对象
                     MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
                     insertSMS(reciveMail);// 添加到邮件数据库中
                 }
+//                for (int i = 0; i < messages.length; i++) {
+//                    // 自定义的邮件对象
+//                    MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
+//                    insertSMS(reciveMail);// 添加到邮件数据库中
+//                }
             }
         }
     }

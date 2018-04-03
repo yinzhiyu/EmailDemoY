@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.AnimationSet;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.android.application.greendao.MailDao;
 import com.email.R;
@@ -20,12 +21,12 @@ import com.email.app.BaseFragment;
 import com.email.table.Mail;
 import com.email.ui.adapter.InboxAdapter;
 import com.email.utils.DividerListItemDecoration;
+import com.email.utils.SharePreferenceUtil;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.Unbinder;
 
 /**
  * 收件箱BlacklistFragment
@@ -47,7 +48,7 @@ public class InboxFragment extends BaseFragment {
     private int totalScrollDistance;
     private int pageNum = 1;
     private InboxAdapter mInboxAdapter;
-
+    private int DataNum;
     public static InboxFragment newInstance(String content) {
         Bundle args = new Bundle();
         args.putString("ARGS", content);
@@ -71,6 +72,7 @@ public class InboxFragment extends BaseFragment {
     }
 
     private void initView() {
+
         srlHomeSwipeRefresh.setEnabled(true);
         srlHomeSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -79,27 +81,38 @@ public class InboxFragment extends BaseFragment {
                 getData(pageNum);
             }
         });
-//        recycleScroll();
         rvHomeRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    //获取最后一个完全显示的ItemPosition
+                    int lastVisibleItem = layoutManager.findLastCompletelyVisibleItemPosition();
+                    int totalItemCount = layoutManager.getItemCount();
+                    // 判断是否滚动到底部，并且是向右滚动
+                    if (lastVisibleItem == (totalItemCount - 1) && !isShow) {// (totalItemCount - 1) && isSlidingToLast
+                        //加载更多功能的代码
+                        pageNum++;
+                        getMore(pageNum);
+                    }
+                }
             }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                try {
+                int firstVisableItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+                if (firstVisableItem == 0) {
+                    return;
+                }
+                if ((dy > 0 && isShow) || (dy < 0 && !isShow)) {
                     totalScrollDistance += dy;
-                    if (totalScrollDistance > SCROLL_DISTANCE && mLlNull.getVisibility() == View.GONE) {
-                        show();
-                        isShowToolbar = false;
-                    } else if (totalScrollDistance < SCROLL_DISTANCE && mLlNull.getVisibility() == View.VISIBLE) {
-                        hide();
-                        isShowToolbar = true;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                }
+                if (totalScrollDistance > SCROLL_DISTANCE && isShow) {
+                    isShow = false;
+                    totalScrollDistance = 0;
+                } else if (totalScrollDistance < -SCROLL_DISTANCE && !isShow) {
+                    isShow = true;
+                    totalScrollDistance = 0;
                 }
             }
         });
@@ -117,6 +130,7 @@ public class InboxFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
+        DataNum = SharePreferenceUtil.getInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM);
         getData(pageNum);
     }
 
@@ -146,6 +160,24 @@ public class InboxFragment extends BaseFragment {
 
     }
 
+    private void getMore(int num) {
+        int getNum = num * 10;
+        if (DataNum > getNum) {
+            MailDao smsDao = BaseApplication.getInstance().getDaoSession().getMailDao();
+            //limit(int)  限制查询返回的数据条数。
+            //offset(int) 设置查询跳过的条数，offset(int)必须和limit(int)一起使用。
+            List<Mail> smsList = smsDao.queryBuilder().limit(10).offset(getNum).build().list();
+            if (srlHomeSwipeRefresh != null) {
+                srlHomeSwipeRefresh.setRefreshing(false);
+            }
+            mInboxAdapter.notifityData(smsList);
+        }else {
+            Toast.makeText(activity, "我是有底线的...", Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
     private void hide() {
         // 组合动画设置-title动画消失
         AnimationSet setAnimation = new AnimationSet(true);
@@ -164,47 +196,6 @@ public class InboxFragment extends BaseFragment {
         setAnimation.addAnimation(alphaAnimation);
         mLlNull.startAnimation(setAnimation);
         mLlNull.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * 监听上拉加载
-     */
-    private void recycleScroll() {
-        rvHomeRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    //获取最后一个完全显示的ItemPosition
-                    int lastVisibleItem = layoutManager.findLastCompletelyVisibleItemPosition();
-                    int totalItemCount = layoutManager.getItemCount();
-                    // 判断是否滚动到底部，并且是向右滚动
-                    if (lastVisibleItem == (totalItemCount - 1) && !isShow) {// (totalItemCount - 1) && isSlidingToLast
-                        //加载更多功能的代码
-                        pageNum++;
-                        getData(pageNum);
-                    }
-                }
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                int firstVisableItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-                if (firstVisableItem == 0) {
-                    return;
-                }
-                if ((dy > 0 && isShow) || (dy < 0 && !isShow)) {
-                    totalScrollDistance += dy;
-                }
-                if (totalScrollDistance > SCROLL_DISTANCE && isShow) {
-                    isShow = false;
-                    totalScrollDistance = 0;
-                } else if (totalScrollDistance < -SCROLL_DISTANCE && !isShow) {
-                    isShow = true;
-                    totalScrollDistance = 0;
-                }
-            }
-        });
     }
 
     private void setLayoutManager() {
