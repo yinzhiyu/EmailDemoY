@@ -37,6 +37,7 @@ public class MailDao extends AbstractDao<Mail, Long> {
         public final static Property Html = new Property(10, boolean.class, "html", false, "HTML");
         public final static Property News = new Property(11, boolean.class, "news", false, "NEWS");
         public final static Property Charset = new Property(12, String.class, "charset", false, "CHARSET");
+        public final static Property UsefulType = new Property(13, int.class, "usefulType", false, "USEFUL_TYPE");
     }
 
 
@@ -64,7 +65,8 @@ public class MailDao extends AbstractDao<Mail, Long> {
                 "\"REPLYSIGN\" INTEGER NOT NULL ," + // 9: replysign
                 "\"HTML\" INTEGER NOT NULL ," + // 10: html
                 "\"NEWS\" INTEGER NOT NULL ," + // 11: news
-                "\"CHARSET\" TEXT);"); // 12: charset
+                "\"CHARSET\" TEXT," + // 12: charset
+                "\"USEFUL_TYPE\" INTEGER NOT NULL );"); // 13: usefulType
     }
 
     /** Drops the underlying database table. */
@@ -129,6 +131,7 @@ public class MailDao extends AbstractDao<Mail, Long> {
         if (charset != null) {
             stmt.bindString(13, charset);
         }
+        stmt.bindLong(14, entity.getUsefulType());
     }
 
     @Override
@@ -187,6 +190,7 @@ public class MailDao extends AbstractDao<Mail, Long> {
         if (charset != null) {
             stmt.bindString(13, charset);
         }
+        stmt.bindLong(14, entity.getUsefulType());
     }
 
     @Override
@@ -209,7 +213,8 @@ public class MailDao extends AbstractDao<Mail, Long> {
             cursor.getShort(offset + 9) != 0, // replysign
             cursor.getShort(offset + 10) != 0, // html
             cursor.getShort(offset + 11) != 0, // news
-            cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12) // charset
+            cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12), // charset
+            cursor.getInt(offset + 13) // usefulType
         );
         return entity;
     }
@@ -229,6 +234,7 @@ public class MailDao extends AbstractDao<Mail, Long> {
         entity.setHtml(cursor.getShort(offset + 10) != 0);
         entity.setNews(cursor.getShort(offset + 11) != 0);
         entity.setCharset(cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12));
+        entity.setUsefulType(cursor.getInt(offset + 13));
      }
     
     @Override

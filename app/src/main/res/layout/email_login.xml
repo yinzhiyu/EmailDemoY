@@ -30,8 +30,7 @@
               android:layout_height="fill_parent" 
               android:hint="@string/emailaddress" 
               android:singleLine="true"
-              android:text="15811555106@163.com"
-              android:inputType="textEmailAddress" 
+              android:inputType="textEmailAddress"
               android:imeOptions="actionGo" 
               style="@style/login_field" />
           <Button 
@@ -58,8 +57,7 @@
               android:layout_width="fill_parent" 
               android:layout_height="fill_parent" 
               android:hint="@string/emailpassword"
-              android:text="Qweasd123"
-              android:singleLine="true" 
+              android:singleLine="true"
               android:inputType="textPassword" 
               android:imeOptions="actionGo" 
               style="@style/login_field" />

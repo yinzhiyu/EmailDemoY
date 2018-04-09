@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 @Entity
-public class Mail implements Parcelable{
+public class Mail {
     @Id(autoincrement = true)
     private Long id;
     private String messageID;
@@ -27,10 +27,12 @@ public class Mail implements Parcelable{
     private boolean news;
 //    private ArrayList<String> attachments;
     private String charset;
-    @Generated(hash = 1420259787)
+    private int usefulType;
+    @Generated(hash = 1508775443)
     public Mail(Long id, String messageID, String from, String to, String cc,
             String bcc, String subject, String sentdata, String content,
-            boolean replysign, boolean html, boolean news, String charset) {
+            boolean replysign, boolean html, boolean news, String charset,
+            int usefulType) {
         this.id = id;
         this.messageID = messageID;
         this.from = from;
@@ -44,43 +46,11 @@ public class Mail implements Parcelable{
         this.html = html;
         this.news = news;
         this.charset = charset;
+        this.usefulType = usefulType;
     }
     @Generated(hash = 1943431032)
     public Mail() {
     }
-
-    protected Mail(Parcel in) {
-        if (in.readByte() == 0) {
-            id = null;
-        } else {
-            id = in.readLong();
-        }
-        messageID = in.readString();
-        from = in.readString();
-        to = in.readString();
-        cc = in.readString();
-        bcc = in.readString();
-        subject = in.readString();
-        sentdata = in.readString();
-        content = in.readString();
-        replysign = in.readByte() != 0;
-        html = in.readByte() != 0;
-        news = in.readByte() != 0;
-        charset = in.readString();
-    }
-
-    public static final Creator<Mail> CREATOR = new Creator<Mail>() {
-        @Override
-        public Mail createFromParcel(Parcel in) {
-            return new Mail(in);
-        }
-
-        @Override
-        public Mail[] newArray(int size) {
-            return new Mail[size];
-        }
-    };
-
     public Long getId() {
         return this.id;
     }
@@ -159,31 +129,10 @@ public class Mail implements Parcelable{
     public void setCharset(String charset) {
         this.charset = charset;
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
+    public int getUsefulType() {
+        return this.usefulType;
     }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        if (id == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(id);
-        }
-        dest.writeString(messageID);
-        dest.writeString(from);
-        dest.writeString(to);
-        dest.writeString(cc);
-        dest.writeString(bcc);
-        dest.writeString(subject);
-        dest.writeString(sentdata);
-        dest.writeString(content);
-        dest.writeByte((byte) (replysign ? 1 : 0));
-        dest.writeByte((byte) (html ? 1 : 0));
-        dest.writeByte((byte) (news ? 1 : 0));
-        dest.writeString(charset);
+    public void setUsefulType(int usefulType) {
+        this.usefulType = usefulType;
     }
 }

@@ -13,14 +13,18 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.AnimationSet;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
+import com.android.application.greendao.MailDao;
 import com.email.R;
 import com.email.app.BaseApplication;
 import com.email.app.BaseFragment;
 import com.email.table.Mail;
+import com.email.ui.adapter.InboxAdapter;
 import com.email.ui.adapter.RubbishAdapter;
 import com.email.utils.DividerListItemDecoration;
 import com.email.utils.RecyclerViewClickListener;
+import com.email.utils.SharePreferenceUtil;
 
 import java.util.List;
 
@@ -40,7 +44,7 @@ public class RubbishBoxFragment extends BaseFragment {
     @BindView(R.id.srl_home_swipe_refresh)
     SwipeRefreshLayout srlHomeSwipeRefresh;
     @BindView(R.id.ll_null)
-    LinearLayout llNull;
+    LinearLayout mLlNull;
     private boolean isShowToolbar = true;
     //--------------------
     private static final int SCROLL_DISTANCE = 50;
@@ -49,8 +53,7 @@ public class RubbishBoxFragment extends BaseFragment {
     private int totalScrollDistance;
     private int pageNum = 1;
     private RubbishAdapter mRubbishAdapter;
-    private List<Mail> smsList;
-
+    private int DataNum;
     public static RubbishBoxFragment newInstance(String content) {
         Bundle args = new Bundle();
         args.putString("ARGS", content);
@@ -82,58 +85,41 @@ public class RubbishBoxFragment extends BaseFragment {
                 getData(pageNum);
             }
         });
-//        recycleScroll();
-        rvHomeRecycler.addOnItemTouchListener(new RecyclerViewClickListener(getActivity(), rvHomeRecycler,
-                new RecyclerViewClickListener.OnItemClickListener() {
-
-                    @Override
-                    public void onItemLongClick(View view, final int position) {
-//                        new MaterialDialog.Builder(mContext)
-//                                .content("移到收件箱？")
-//                                .positiveText("再看看")
-//                                .negativeText("确定")
-//                                .onPositive(new MaterialDialog.SingleButtonCallback() {
-//                                    @Override
-//                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//        rvHomeRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+//                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                    //获取最后一个完全显示的ItemPosition
+//                    int lastVisibleItem = layoutManager.findLastCompletelyVisibleItemPosition();
+//                    int totalItemCount = layoutManager.getItemCount();
+//                    // 判断是否滚动到底部，并且是向右滚动
+//                    if (lastVisibleItem == (totalItemCount - 1) && !isShow) {// (totalItemCount - 1) && isSlidingToLast
+//                        //加载更多功能的代码
+//                        pageNum++;
+//                        getMore(pageNum);
+//                    }
+//                }
+//            }
 //
-//                                    }
-//                                })
-//                                .onNegative(new MaterialDialog.SingleButtonCallback() {
-//                                    @Override
-//                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-//                                        SMSDao smsDao = BaseApplication.getInstance().getDaoSession().getSMSDao();
-//                                        SMS sms = smsDao.queryBuilder().where(SMSDao.Properties.SmsId.eq(smsList.get(position).getSmsId())).build().unique();
-//                                        sms.setUsefulType(1);
-//                                        smsDao.update(sms);
-//                                        getData(pageNum);
-//                                    }
-//                                })
-//                                .show();
-                    }
-                }));
-        rvHomeRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                try {
-                    totalScrollDistance += dy;
-                    if (totalScrollDistance > SCROLL_DISTANCE && llNull.getVisibility() == View.GONE) {
-                        show();
-                        isShowToolbar = false;
-                    } else if (totalScrollDistance < SCROLL_DISTANCE && llNull.getVisibility() == View.VISIBLE) {
-                        hide();
-                        isShowToolbar = true;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+//            @Override
+//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//                super.onScrolled(recyclerView, dx, dy);
+//                int firstVisableItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+//                if (firstVisableItem == 0) {
+//                    return;
+//                }
+//                if ((dy > 0 && isShow) || (dy < 0 && !isShow)) {
+//                    totalScrollDistance += dy;
+//                }
+//                if (totalScrollDistance > SCROLL_DISTANCE && isShow) {
+//                    isShow = false;
+//                    totalScrollDistance = 0;
+//                } else if (totalScrollDistance < -SCROLL_DISTANCE && !isShow) {
+//                    isShow = true;
+//                    totalScrollDistance = 0;
+//                }
+//            }
+//        });
         setLayoutManager();
     }
 
@@ -144,90 +130,48 @@ public class RubbishBoxFragment extends BaseFragment {
     }
 
     private void getData(int num) {
-//        SMSDao smsDao = BaseApplication.getInstance().getDaoSession().getSMSDao();
-//        smsList = smsDao.queryBuilder()
-////                .where(SMSDao.Properties.Id.eq(SharePreferenceUtil.getInfoLong(getActivity(), SharePreferenceUtil.ID)), SMSDao.Properties.UsefulType.eq("0")).limit(Integer.parseInt(num + "0")).build().list();
-//                .where(SMSDao.Properties.Id.eq(SharePreferenceUtil.getInfoLong(getActivity(), SharePreferenceUtil.ID)), SMSDao.Properties.UsefulType.eq("0")).build().list();
-//        if (srlHomeSwipeRefresh != null) {
-//            srlHomeSwipeRefresh.setRefreshing(false);
-//        }
-//        if (pageNum == 1) {
-//            if (smsList.size() > 0) {
-//                mLlNull.setVisibility(View.GONE);
-//                srlHomeSwipeRefresh.setVisibility(View.VISIBLE);
-//                mRubbishAdapter = new RubbishAdapter(getActivity(), smsList);
-//                mRubbishAdapter.setCallback(this);
-//                rvHomeRecycler.setAdapter(mRubbishAdapter);
-//            } else {
-//                srlHomeSwipeRefresh.setVisibility(View.GONE);
-//                mLlNull.setVisibility(View.VISIBLE);
-//            }
-//
-//        } else {
-//            mRubbishAdapter.notifityData(smsList);
-//        }
-
-    }
-
-    private void hide() {
-        // 组合动画设置-title动画消失
-        AnimationSet setAnimation = new AnimationSet(true);
-        AlphaAnimation alphaAnimation = new AlphaAnimation(1f, 0f);
-        alphaAnimation.setDuration(1000);
-        setAnimation.addAnimation(alphaAnimation);
-        llNull.startAnimation(setAnimation);
-        llNull.setVisibility(View.GONE);
-    }
-
-    private void show() {
-        // 组合动画设置-title动画显示
-        AnimationSet setAnimation = new AnimationSet(true);
-        AlphaAnimation alphaAnimation = new AlphaAnimation(0f, 1f);
-        alphaAnimation.setDuration(1500);
-        setAnimation.addAnimation(alphaAnimation);
-        llNull.startAnimation(setAnimation);
-        llNull.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * 监听上拉加载
-     */
-    private void recycleScroll() {
-        rvHomeRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    //获取最后一个完全显示的ItemPosition
-                    int lastVisibleItem = layoutManager.findLastCompletelyVisibleItemPosition();
-                    int totalItemCount = layoutManager.getItemCount();
-                    // 判断是否滚动到底部，并且是向右滚动
-                    if (lastVisibleItem == (totalItemCount - 1) && !isShow) {// (totalItemCount - 1) && isSlidingToLast
-                        //加载更多功能的代码
-                        pageNum++;
-                        getData(pageNum);
-                    }
-                }
+        MailDao smsDao = BaseApplication.getInstance().getDaoSession().getMailDao();
+        //limit(int)  限制查询返回的数据条数。
+        //offset(int) 设置查询跳过的条数，offset(int)必须和limit(int)一起使用。
+//        List<Mail> smsList = smsDao.queryBuilder().where(MailDao.Properties.UsefulType.eq("0")).limit(10).offset(0).build().list();
+        List<Mail> smsList = smsDao.queryBuilder().where(MailDao.Properties.UsefulType.eq(0)).build().list();
+        if (srlHomeSwipeRefresh != null) {
+            srlHomeSwipeRefresh.setRefreshing(false);
+        }
+        if (pageNum == 1) {
+            if (smsList.size() > 0) {
+                mLlNull.setVisibility(View.GONE);
+                srlHomeSwipeRefresh.setVisibility(View.VISIBLE);
+                mRubbishAdapter = new RubbishAdapter(getActivity(), smsList);
+                rvHomeRecycler.setAdapter(mRubbishAdapter);
+            } else {
+                srlHomeSwipeRefresh.setVisibility(View.GONE);
+                mLlNull.setVisibility(View.VISIBLE);
             }
+        } else {
 
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                int firstVisableItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-                if (firstVisableItem == 0) {
-                    return;
-                }
-                if ((dy > 0 && isShow) || (dy < 0 && !isShow)) {
-                    totalScrollDistance += dy;
-                }
-                if (totalScrollDistance > SCROLL_DISTANCE && isShow) {
-                    isShow = false;
-                    totalScrollDistance = 0;
-                } else if (totalScrollDistance < -SCROLL_DISTANCE && !isShow) {
-                    isShow = true;
-                    totalScrollDistance = 0;
-                }
+            mRubbishAdapter.notifityData(smsList);
+        }
+
+    }
+
+
+    private void getMore(int num) {
+        int getNum = num * 10;
+        if (DataNum > getNum) {
+            MailDao smsDao = BaseApplication.getInstance().getDaoSession().getMailDao();
+            //limit(int)  限制查询返回的数据条数。
+            //offset(int) 设置查询跳过的条数，offset(int)必须和limit(int)一起使用。
+            List<Mail> smsList = smsDao.queryBuilder().where(MailDao.Properties.UsefulType.eq("0")).limit(10).offset(getNum).build().list();
+            if (srlHomeSwipeRefresh != null) {
+                srlHomeSwipeRefresh.setRefreshing(false);
             }
-        });
+            mRubbishAdapter.notifityData(smsList);
+        }else {
+            Toast.makeText(activity, "我是有底线的...", Toast.LENGTH_SHORT).show();
+        }
+
+
     }
 
     private void setLayoutManager() {

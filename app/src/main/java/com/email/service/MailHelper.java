@@ -2,10 +2,20 @@
 package com.email.service;
 
 import android.content.Context;
+import android.widget.Toast;
 
+import com.android.application.greendao.BlackWordDao;
 import com.android.application.greendao.MailDao;
+import com.android.application.greendao.WhiteWordDao;
+import com.email.MainActivity;
 import com.email.app.BaseApplication;
+import com.email.http.LtpCloud;
+import com.email.table.BlackWord;
 import com.email.table.Mail;
+import com.email.table.WhiteWord;
+import com.email.ui.fragment.InboxFragment;
+import com.email.ui.fragment.RubbishBoxFragment;
+import com.email.utils.FilterUtil;
 import com.email.utils.SharePreferenceUtil;
 
 import java.util.ArrayList;
@@ -33,7 +43,6 @@ public class MailHelper {
     }
 
     /**
-     *
      * @param context
      */
     private MailHelper(Context context) {
@@ -118,18 +127,18 @@ public class MailHelper {
 
     /**
      * 取得所有的邮件
-     * 
+     *
      * @param folderName 文件夹名，例：收件箱是"INBOX"
-     * @return　List<MailReceiver> 放有ReciveMail对象的List
      * @throws MessagingException
+     * @return　List<MailReceiver> 放有ReciveMail对象的List
      */
     public List<MailReceiver> getAllMail(String folderName) throws MessagingException {
         List<MailReceiver> mailList = new ArrayList<MailReceiver>();
 
         // 连接服务器
-        Store store= BaseApplication.session.getStore("pop3");
-        String temp= BaseApplication.info.getMailServerHost();
-        String host=temp.replace("smtp", "pop");
+        Store store = BaseApplication.session.getStore("pop3");
+        String temp = BaseApplication.info.getMailServerHost();
+        String host = temp.replace("smtp", "pop");
         store.connect(host, BaseApplication.info.getUserName(), BaseApplication.info.getPassword());
         // 打开文件夹
         Folder folder = store.getFolder(folderName);
@@ -143,7 +152,7 @@ public class MailHelper {
         } else {
             // 取得所有的邮件
             Message[] messages = folder.getMessages();
-             for (int i = 0; i < messages.length; i++) {
+            for (int i = 0; i < messages.length; i++) {
                 // 自定义的邮件对象
                 MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
                 mailList.add(reciveMail);// 添加到邮件列表中
@@ -151,16 +160,17 @@ public class MailHelper {
             return mailList;
         }
     }
+
     /**
      * 取得所有的邮件
      *
      * @param folderName 文件夹名，例：收件箱是"INBOX"
-     * @return　List<MailReceiver> 放有ReciveMail对象的List
      * @throws MessagingException
+     * @return　List<MailReceiver> 放有ReciveMail对象的List
      */
     public static void getAllMailForData(String folderName) throws MessagingException {
         int dataNum = SharePreferenceUtil.getInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM);
-        if (dataNum ==-1) {
+        if (dataNum == -1) {
             // 连接服务器
             Store store = BaseApplication.session.getStore("pop3");
             String temp = BaseApplication.info.getMailServerHost();
@@ -178,44 +188,135 @@ public class MailHelper {
                 SharePreferenceUtil.saveInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM, mailCount);
                 // 取得所有的邮件
                 Message[] messages = folder.getMessages();
-                for (int i = messages.length-1; i >=0; i--) {
-                    // 自定义的邮件对象
-                    MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
-                    insertSMS(reciveMail);// 添加到邮件数据库中
-                }
-//                for (int i = 0; i < messages.length; i++) {
+//                for (int i = messages.length - 1; i >= 0; i--) {
 //                    // 自定义的邮件对象
 //                    MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
-//                    insertSMS(reciveMail);// 添加到邮件数据库中
+//                    insertSMS(reciveMail, 1);// 添加到邮件数据库中
 //                }
+                for (int i = 0; i < messages.length; i++) {
+                    // 自定义的邮件对象
+                    MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
+                    insertSMS(reciveMail,1);// 添加到邮件数据库中
+                }
             }
         }
     }
 
-    private void insertSMS1(List<MailReceiver> mails) {
-        MailDao smsDao = BaseApplication.getInstance().getDaoSession().getMailDao();
-        for (MailReceiver mailReceiver : mails) {
-            Mail insertData = null;
-            try {
-                insertData = new Mail(null,mailReceiver.getMessageID(), mailReceiver.getFrom(), mailReceiver.getMailAddress("TO"), mailReceiver.getMailAddress("CC"), mailReceiver.getMailAddress("BCC"), mailReceiver.getSubject(),mailReceiver.getSentData(),mailReceiver.getMailContent(),mailReceiver.getReplySign(),mailReceiver.isHtml(),mailReceiver.isNew(),mailReceiver.getCharset());
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
+    /**
+     * 取得所有的邮件
+     *
+     * @param folderName 文件夹名，例：收件箱是"INBOX"
+     * @throws MessagingException
+     * @return　List<MailReceiver> 放有ReciveMail对象的List
+     */
+    public static void mailRefresh(String folderName) throws MessagingException {
+            // 连接服务器
+            Store store = BaseApplication.session.getStore("pop3");
+            String temp = BaseApplication.info.getMailServerHost();
+            String host = temp.replace("smtp", "pop");
+            store.connect(host, BaseApplication.info.getUserName(), BaseApplication.info.getPassword());
+            // 打开文件夹
+            Folder folder = store.getFolder(folderName);
+            folder.open(Folder.READ_ONLY);
+            // 总的邮件数
+            int mailCount = folder.getMessageCount();
+            if (mailCount == 0) {
+                folder.close(true);
+                store.close();
+            } else {
+                int NowMailNum = SharePreferenceUtil.getInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM);
+                if (mailCount > NowMailNum) {
+                    SharePreferenceUtil.saveInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM, mailCount);
+                    // 取得所有的邮件
+                    Message[] messages = folder.getMessages();
+                    int len = messages.length - (mailCount - NowMailNum);
+                    for (int i = messages.length - 1; i >= len; i--) {
+                        // 自定义的邮件对象
+                        MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
+                        try {
+                            judgment(reciveMail.getMailContent(), reciveMail);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
-            smsDao.insert(insertData);
-        }
     }
-    private static void insertSMS(MailReceiver mailReceiver) {
+
+
+    private static void insertSMS(MailReceiver mailReceiver, int usefulType) {
         MailDao smsDao = BaseApplication.getInstance().getDaoSession().getMailDao();
-            Mail insertData = null;
-            try {
-                insertData = new Mail(null,mailReceiver.getMessageID(), mailReceiver.getFrom(), mailReceiver.getMailAddress("TO"), mailReceiver.getMailAddress("CC"), mailReceiver.getMailAddress("BCC"), mailReceiver.getSubject(),mailReceiver.getSentData(),mailReceiver.getMailContent(),mailReceiver.getReplySign(),mailReceiver.isHtml(),mailReceiver.isNew(),mailReceiver.getCharset());
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
+        Mail insertData = null;
+        try {
+            insertData = new Mail(null, mailReceiver.getMessageID(), mailReceiver.getFrom(), mailReceiver.getMailAddress("TO"), mailReceiver.getMailAddress("CC"), mailReceiver.getMailAddress("BCC"), mailReceiver.getSubject(), mailReceiver.getSentData(), mailReceiver.getMailContent(), mailReceiver.getReplySign(), mailReceiver.isHtml(), mailReceiver.isNew(), mailReceiver.getCharset(), usefulType);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        smsDao.insert(insertData);
+    }
+
+    private static void judgment(String content, MailReceiver mailReceiver) {
+        int type = 1;
+        for (int i = 0; i < FilterUtil.queryMailB().size(); i++) {
+            if (content.contains(FilterUtil.queryMailB().get(i).getMailAdress())) {
+                insertSMS(mailReceiver, 0);// 添加到邮件数据库中
+                type = 0;
+                break;
             }
-            smsDao.insert(insertData);
+        }
+        if (type == 1) {
+            for (int i = 0; i < FilterUtil.queryKeyWord().size(); i++) {
+                if (content.contains(FilterUtil.queryKeyWord().get(i).getKeyword())) {
+                    insertSMS(mailReceiver, 0);// 添加到邮件数据库中
+                    type = 0;
+                    break;
+                }
+            }
+        }
+        if (type == 1) {
+            String content2 = FilterUtil.format(content);//去掉标点符号
+            String ltp = LtpCloud.split(content2);//分词
+            String[] s = ltp.split(" ");//截取根据" "分的词语
+
+            double bayes1 = 1;
+            double bayes2 = 1;
+            for (int i = 0; i < s.length; i++) {//循环，计算每个词语出现的次数，计算概率，加入到数据库
+                //条件概率
+                WhiteWordDao whiteWordDao = BaseApplication.getInstance().getDaoSession().getWhiteWordDao();
+                BlackWordDao blackWordDao = BaseApplication.getInstance().getDaoSession().getBlackWordDao();
+                List<WhiteWord> whiteWordsList = whiteWordDao.
+                        queryBuilder()
+                        .where(WhiteWordDao.Properties.Keyword.eq(s[i])).build().list();
+                List<BlackWord> blackWordsList = blackWordDao.
+                        queryBuilder()
+                        .where(BlackWordDao.Properties.Keyword.eq(s[i])).list();
+
+                double white, black;
+                if (whiteWordsList.size() > 0) {
+                    white = (double) whiteWordsList.get(0).getNumber() / 200;
+                } else {
+                    white = 1;
+                }
+                if (blackWordsList.size() > 0) {
+                    black = (double) blackWordsList.get(0).getNumber() / 200;
+                } else {
+                    black = 1;
+                }
+                String xxx = s[i];
+                double p = white / (white + black);//出现这个词时，该短信为垃圾短信的概率
+
+                //全概率
+                bayes1 = bayes1 * p;
+                bayes2 = bayes2 * (1 - p);
+            }
+            double p = bayes1 / (bayes1 + bayes2);//复合概率
+            if (p > 0.8) {
+                insertSMS(mailReceiver, 0);// 添加到邮件数据库中
+            } else {
+                insertSMS(mailReceiver, 1);// 添加到邮件数据库中
+            }
+        }
     }
 }

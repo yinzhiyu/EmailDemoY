@@ -138,7 +138,8 @@ public class InboxFragment extends BaseFragment {
         MailDao smsDao = BaseApplication.getInstance().getDaoSession().getMailDao();
         //limit(int)  限制查询返回的数据条数。
         //offset(int) 设置查询跳过的条数，offset(int)必须和limit(int)一起使用。
-        List<Mail> smsList = smsDao.queryBuilder().limit(10).offset(0).build().list();
+        List<Mail> smsList = smsDao.queryBuilder().where(MailDao.Properties.UsefulType.eq(1)).orderDesc(MailDao.Properties.Id).limit(10).offset(0).build().list();
+//        List<Mail> smsList = smsDao.queryBuilder().limit(10).offset(0).build().list();
         if (srlHomeSwipeRefresh != null) {
             srlHomeSwipeRefresh.setRefreshing(false);
         }

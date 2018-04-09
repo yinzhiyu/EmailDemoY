@@ -1,6 +1,7 @@
 package com.email;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,15 +14,24 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.android.application.greendao.WhiteWordDao;
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.email.app.BaseActivity;
+import com.email.app.BaseApplication;
 import com.email.service.MailHelper;
+import com.email.table.WhiteWord;
 import com.email.ui.fragment.InboxFragment;
 import com.email.ui.fragment.KeyWordFragment;
 import com.email.ui.fragment.PhoneFragment;
 import com.email.ui.fragment.RubbishBoxFragment;
 import com.email.ui.fragment.SettingFragment;
+import com.email.utils.FilterUtil;
+import com.email.utils.SharePreferenceUtil;
+
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.mail.MessagingException;
 
@@ -48,6 +58,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     private int lastSelectedPosition;
     private int tabIndex;
     private ProgressDialog dialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,13 +67,33 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
         initView();
         setDefaultFragment();
         setIndoxData();
+        setRefresh();
     }
 
     private void setIndoxData() {
         new MyTask().execute();
-        dialog=new ProgressDialog(this);
+        dialog = new ProgressDialog(this);
         dialog.setMessage("加載中...");
         dialog.show();
+    }
+
+    public void newInstance(int num) {
+        mFragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+        switch (num) {
+            case 0:
+                mInboxFragment = InboxFragment.newInstance("");
+                transaction.add(R.id.tb, mInboxFragment);
+                transaction.commit();
+                break;
+            case 1:
+                mRubbishBoxFragment = RubbishBoxFragment.newInstance("");
+                transaction.add(R.id.tb, mRubbishBoxFragment);
+                transaction.commit();
+                break;
+            case 2:
+                break;
+        }
     }
 
     private void initView() {
@@ -146,6 +177,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
                     mRubbishBoxFragment = RubbishBoxFragment.newInstance("");
                     transaction.add(R.id.tb, mRubbishBoxFragment);
                 } else {
+                    mRubbishBoxFragment.onResume();
                     transaction.show(mRubbishBoxFragment);
                 }
                 break;
@@ -229,9 +261,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
             mRubbishBoxFragment = (RubbishBoxFragment) fragment;
         } else if (mPhoneFragment == null && fragment instanceof PhoneFragment) {
             mPhoneFragment = (PhoneFragment) fragment;
-        }        else if (mMeFragment == null && fragment instanceof KeyWordFragment) {
+        } else if (mMeFragment == null && fragment instanceof KeyWordFragment) {
             mMeFragment = (KeyWordFragment) fragment;
-        }        else if (mSettingFragment == null && fragment instanceof SettingFragment) {
+        } else if (mSettingFragment == null && fragment instanceof SettingFragment) {
             mSettingFragment = (SettingFragment) fragment;
         }
     }
@@ -256,11 +288,40 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
             System.exit(0);
         }
     }
+
+    private void setRefresh() {
+
+        TimerTask task = new TimerTask() {
+
+            @Override
+            public void run() {
+                try {
+                    MailHelper.mailRefresh("INBOX");
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        Timer timer = new Timer();
+        //从现在起，过1分钟以后，每隔1分钟执行一次。
+        timer.schedule(task, 1000 * 60, 1000 * 60);
+
+    }
+
     class MyTask extends AsyncTask<Integer, Integer, String> {
         @Override
         protected String doInBackground(Integer... integers) {
             try {
+                SharePreferenceUtil.saveInfo(MainActivity.this, SharePreferenceUtil.BLACKNUM, "200");//黑名单
+                SharePreferenceUtil.saveInfo(MainActivity.this, SharePreferenceUtil.WHITENUM, "200");//白名单
                 MailHelper.getAllMailForData("INBOX");
+                //查
+                WhiteWordDao smsDao = BaseApplication.getInstance().getDaoSession().getWhiteWordDao();
+                List<WhiteWord> users = smsDao.loadAll();
+                if (users.size() <= 0) {
+                    FilterUtil.getBlackList(0);
+                    FilterUtil.getBlackList(1);
+                }
             } catch (MessagingException e) {
                 e.printStackTrace();
             }

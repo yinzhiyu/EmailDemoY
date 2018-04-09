@@ -13,9 +13,10 @@ import com.email.app.BaseApplication;
 public class SharePreferenceUtil {
     //用户alias
     public static final String PHONE = "phone";
-    public static final String PWD = "pwd";
-    public static final String ID = "id";
+    public static final String WHITENUM = "whiteNum";
+    public static final String BLACKNUM = "BlackNum";
     public static final String INBOXNUM = "inboxNum";
+    public static final String RUBBISHNUM = "rubbishNum";
     private static Context mContext = BaseApplication.getInstance();
 
     /**
