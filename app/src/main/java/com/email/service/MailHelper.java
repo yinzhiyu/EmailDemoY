@@ -196,7 +196,7 @@ public class MailHelper {
                 for (int i = 0; i < messages.length; i++) {
                     // 自定义的邮件对象
                     MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
-                    insertSMS(reciveMail,1);// 添加到邮件数据库中
+                    insertSMS(reciveMail, 1);// 添加到邮件数据库中
                 }
             }
         }
@@ -210,37 +210,42 @@ public class MailHelper {
      * @return　List<MailReceiver> 放有ReciveMail对象的List
      */
     public static void mailRefresh(String folderName) throws MessagingException {
-            // 连接服务器
-            Store store = BaseApplication.session.getStore("pop3");
-            String temp = BaseApplication.info.getMailServerHost();
-            String host = temp.replace("smtp", "pop");
-            store.connect(host, BaseApplication.info.getUserName(), BaseApplication.info.getPassword());
-            // 打开文件夹
-            Folder folder = store.getFolder(folderName);
-            folder.open(Folder.READ_ONLY);
-            // 总的邮件数
-            int mailCount = folder.getMessageCount();
-            if (mailCount == 0) {
-                folder.close(true);
-                store.close();
-            } else {
-                int NowMailNum = SharePreferenceUtil.getInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM);
-                if (mailCount > NowMailNum) {
-                    SharePreferenceUtil.saveInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM, mailCount);
-                    // 取得所有的邮件
-                    Message[] messages = folder.getMessages();
-                    int len = messages.length - (mailCount - NowMailNum);
-                    for (int i = messages.length - 1; i >= len; i--) {
-                        // 自定义的邮件对象
-                        MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
-                        try {
-                            judgment(reciveMail.getMailContent(), reciveMail);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+        // 连接服务器
+        Store store = BaseApplication.session.getStore("pop3");
+        String temp = BaseApplication.info.getMailServerHost();
+        String host = temp.replace("smtp", "pop");
+        store.connect(host, BaseApplication.info.getUserName(), BaseApplication.info.getPassword());
+        // 打开文件夹
+        Folder folder = store.getFolder(folderName);
+        folder.open(Folder.READ_ONLY);
+        // 总的邮件数
+        int mailCount = folder.getMessageCount();
+        if (mailCount == 0) {
+            folder.close(true);
+            store.close();
+        } else {
+            int NowMailNum = SharePreferenceUtil.getInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM);
+            if (mailCount > NowMailNum) {
+                SharePreferenceUtil.saveInfoInt(BaseApplication.getContext(), SharePreferenceUtil.INBOXNUM, mailCount);
+                // 取得所有的邮件
+                Message[] messages = folder.getMessages();
+                int len = messages.length - (mailCount - NowMailNum);
+                for (int i = messages.length - 1; i >= len; i--) {
+                    // 自定义的邮件对象
+                    MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
+                    try {
+                        String content = reciveMail.getMailContent();
+                        String adress = reciveMail.getMailAddress("TO") + reciveMail.getMailAddress("CC") + reciveMail.getMailAddress("BCC");
+                        if (content.contains("<div>")) {
+                            content = content.substring(0, content.indexOf("<div>") - 1);
                         }
+                        judgment(content, adress, reciveMail);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
+        }
     }
 
 
@@ -257,11 +262,24 @@ public class MailHelper {
         smsDao.insert(insertData);
     }
 
-    private static void judgment(String content, MailReceiver mailReceiver) {
+    private static void insertSMS(MailReceiver mailReceiver, String content, int usefulType) {
+        MailDao smsDao = BaseApplication.getInstance().getDaoSession().getMailDao();
+        Mail insertData = null;
+        try {
+            insertData = new Mail(null, mailReceiver.getMessageID(), mailReceiver.getFrom(), mailReceiver.getMailAddress("TO"), mailReceiver.getMailAddress("CC"), mailReceiver.getMailAddress("BCC"), mailReceiver.getSubject(), mailReceiver.getSentData(), content, mailReceiver.getReplySign(), mailReceiver.isHtml(), mailReceiver.isNew(), mailReceiver.getCharset(), usefulType);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        smsDao.insert(insertData);
+    }
+
+    private static void judgment(String content, String adress, MailReceiver mailReceiver) {
         int type = 1;
         for (int i = 0; i < FilterUtil.queryMailB().size(); i++) {
-            if (content.contains(FilterUtil.queryMailB().get(i).getMailAdress())) {
-                insertSMS(mailReceiver, 0);// 添加到邮件数据库中
+            if (adress.contains(FilterUtil.queryMailB().get(i).getMailAdress())) {
+                insertSMS(mailReceiver, content, 0);// 添加到邮件数据库中
                 type = 0;
                 break;
             }
@@ -269,7 +287,7 @@ public class MailHelper {
         if (type == 1) {
             for (int i = 0; i < FilterUtil.queryKeyWord().size(); i++) {
                 if (content.contains(FilterUtil.queryKeyWord().get(i).getKeyword())) {
-                    insertSMS(mailReceiver, 0);// 添加到邮件数据库中
+                    insertSMS(mailReceiver, content, 0);// 添加到邮件数据库中
                     type = 0;
                     break;
                 }
@@ -313,9 +331,9 @@ public class MailHelper {
             }
             double p = bayes1 / (bayes1 + bayes2);//复合概率
             if (p > 0.8) {
-                insertSMS(mailReceiver, 0);// 添加到邮件数据库中
+                insertSMS(mailReceiver, content, 0);// 添加到邮件数据库中
             } else {
-                insertSMS(mailReceiver, 1);// 添加到邮件数据库中
+                insertSMS(mailReceiver, content, 1);// 添加到邮件数据库中
             }
         }
     }

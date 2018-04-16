@@ -98,7 +98,7 @@ public class PhoneFragment extends BaseFragment {
                     @Override
                     public void onItemLongClick(View view, final int position) {
                         new MaterialDialog.Builder(mContext)
-                                .content("把此手机号移出黑名单？")
+                                .content("把此邮箱地址移出黑名单？")
                                 .positiveText("再看看")
                                 .negativeText("确定")
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
