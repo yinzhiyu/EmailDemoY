@@ -237,7 +237,7 @@ public class MailHelper {
                         String content = reciveMail.getMailContent();
                         String adress = reciveMail.getMailAddress("TO") + reciveMail.getMailAddress("CC") + reciveMail.getMailAddress("BCC");
                         if (content.contains("<div>")) {
-                            content = content.substring(0, content.indexOf("<div>") - 1);
+                            content = content.substring(0, content.indexOf("<div>"));
                         }
                         judgment(content, adress, reciveMail);
                     } catch (Exception e) {
