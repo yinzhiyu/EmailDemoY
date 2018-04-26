@@ -8,17 +8,17 @@ import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.identityscope.IdentityScopeType;
 import org.greenrobot.greendao.internal.DaoConfig;
 
-import com.email.table.Mail;
-import com.email.table.User;
-import com.email.table.MailBList;
 import com.email.table.KeyWord;
+import com.email.table.Mail;
+import com.email.table.MailBList;
+import com.email.table.User;
 import com.email.table.BlackWord;
 import com.email.table.WhiteWord;
 
-import com.android.application.greendao.MailDao;
-import com.android.application.greendao.UserDao;
-import com.android.application.greendao.MailBListDao;
 import com.android.application.greendao.KeyWordDao;
+import com.android.application.greendao.MailDao;
+import com.android.application.greendao.MailBListDao;
+import com.android.application.greendao.UserDao;
 import com.android.application.greendao.BlackWordDao;
 import com.android.application.greendao.WhiteWordDao;
 
@@ -31,17 +31,17 @@ import com.android.application.greendao.WhiteWordDao;
  */
 public class DaoSession extends AbstractDaoSession {
 
-    private final DaoConfig mailDaoConfig;
-    private final DaoConfig userDaoConfig;
-    private final DaoConfig mailBListDaoConfig;
     private final DaoConfig keyWordDaoConfig;
+    private final DaoConfig mailDaoConfig;
+    private final DaoConfig mailBListDaoConfig;
+    private final DaoConfig userDaoConfig;
     private final DaoConfig blackWordDaoConfig;
     private final DaoConfig whiteWordDaoConfig;
 
-    private final MailDao mailDao;
-    private final UserDao userDao;
-    private final MailBListDao mailBListDao;
     private final KeyWordDao keyWordDao;
+    private final MailDao mailDao;
+    private final MailBListDao mailBListDao;
+    private final UserDao userDao;
     private final BlackWordDao blackWordDao;
     private final WhiteWordDao whiteWordDao;
 
@@ -49,17 +49,17 @@ public class DaoSession extends AbstractDaoSession {
             daoConfigMap) {
         super(db);
 
+        keyWordDaoConfig = daoConfigMap.get(KeyWordDao.class).clone();
+        keyWordDaoConfig.initIdentityScope(type);
+
         mailDaoConfig = daoConfigMap.get(MailDao.class).clone();
         mailDaoConfig.initIdentityScope(type);
-
-        userDaoConfig = daoConfigMap.get(UserDao.class).clone();
-        userDaoConfig.initIdentityScope(type);
 
         mailBListDaoConfig = daoConfigMap.get(MailBListDao.class).clone();
         mailBListDaoConfig.initIdentityScope(type);
 
-        keyWordDaoConfig = daoConfigMap.get(KeyWordDao.class).clone();
-        keyWordDaoConfig.initIdentityScope(type);
+        userDaoConfig = daoConfigMap.get(UserDao.class).clone();
+        userDaoConfig.initIdentityScope(type);
 
         blackWordDaoConfig = daoConfigMap.get(BlackWordDao.class).clone();
         blackWordDaoConfig.initIdentityScope(type);
@@ -67,44 +67,44 @@ public class DaoSession extends AbstractDaoSession {
         whiteWordDaoConfig = daoConfigMap.get(WhiteWordDao.class).clone();
         whiteWordDaoConfig.initIdentityScope(type);
 
-        mailDao = new MailDao(mailDaoConfig, this);
-        userDao = new UserDao(userDaoConfig, this);
-        mailBListDao = new MailBListDao(mailBListDaoConfig, this);
         keyWordDao = new KeyWordDao(keyWordDaoConfig, this);
+        mailDao = new MailDao(mailDaoConfig, this);
+        mailBListDao = new MailBListDao(mailBListDaoConfig, this);
+        userDao = new UserDao(userDaoConfig, this);
         blackWordDao = new BlackWordDao(blackWordDaoConfig, this);
         whiteWordDao = new WhiteWordDao(whiteWordDaoConfig, this);
 
-        registerDao(Mail.class, mailDao);
-        registerDao(User.class, userDao);
-        registerDao(MailBList.class, mailBListDao);
         registerDao(KeyWord.class, keyWordDao);
+        registerDao(Mail.class, mailDao);
+        registerDao(MailBList.class, mailBListDao);
+        registerDao(User.class, userDao);
         registerDao(BlackWord.class, blackWordDao);
         registerDao(WhiteWord.class, whiteWordDao);
     }
     
     public void clear() {
-        mailDaoConfig.clearIdentityScope();
-        userDaoConfig.clearIdentityScope();
-        mailBListDaoConfig.clearIdentityScope();
         keyWordDaoConfig.clearIdentityScope();
+        mailDaoConfig.clearIdentityScope();
+        mailBListDaoConfig.clearIdentityScope();
+        userDaoConfig.clearIdentityScope();
         blackWordDaoConfig.clearIdentityScope();
         whiteWordDaoConfig.clearIdentityScope();
+    }
+
+    public KeyWordDao getKeyWordDao() {
+        return keyWordDao;
     }
 
     public MailDao getMailDao() {
         return mailDao;
     }
 
-    public UserDao getUserDao() {
-        return userDao;
-    }
-
     public MailBListDao getMailBListDao() {
         return mailBListDao;
     }
 
-    public KeyWordDao getKeyWordDao() {
-        return keyWordDao;
+    public UserDao getUserDao() {
+        return userDao;
     }
 
     public BlackWordDao getBlackWordDao() {

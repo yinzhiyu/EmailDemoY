@@ -235,7 +235,8 @@ public class MailHelper {
                     MailReceiver reciveMail = new MailReceiver((MimeMessage) messages[i]);
                     try {
                         String content = reciveMail.getMailContent();
-                        String adress = reciveMail.getMailAddress("TO") + reciveMail.getMailAddress("CC") + reciveMail.getMailAddress("BCC");
+//                        String adress = reciveMail.getMailAddress("TO") + reciveMail.getMailAddress("CC") + reciveMail.getMailAddress("BCC");
+                        String adress = reciveMail.getFrom();
                         if (content.contains("<div>")) {
                             content = content.substring(0, content.indexOf("<div>"));
                         }
